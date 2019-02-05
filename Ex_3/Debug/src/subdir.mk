@@ -5,18 +5,15 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/HelloWorld.cpp \
-../src/calcfactorial.cpp \
-../src/pokergame.cpp 
+../src/calcfactorial.cpp 
 
 OBJS += \
 ./src/HelloWorld.o \
-./src/calcfactorial.o \
-./src/pokergame.o 
+./src/calcfactorial.o 
 
 CPP_DEPS += \
 ./src/HelloWorld.d \
-./src/calcfactorial.d \
-./src/pokergame.d 
+./src/calcfactorial.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
