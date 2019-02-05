@@ -1,5 +1,9 @@
 #include "poker.h"
- 
+#include <iostream>
+#include <array>
+#include <ctime> // for time()
+#include <cstdlib> // for rand() and srand()
+
 enum CardSuit
 {
 	SUIT_CLUB,

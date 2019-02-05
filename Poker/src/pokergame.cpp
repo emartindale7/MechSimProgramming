@@ -1,44 +1,11 @@
-#include <iostream>
-#include <array>
-#include <ctime> // for time()
-#include <cstdlib> // for rand() and srand()
- 
-enum CardSuit
+
+
+#include "poker.h"
+
+
+void CardClass::printCard()
 {
-	SUIT_CLUB,
-	SUIT_DIAMOND,
-	SUIT_HEART,
-	SUIT_SPADE,
-	MAX_SUITS
-};
- 
-enum CardRank
-{
-	RANK_2,
-	RANK_3,
-	RANK_4,
-	RANK_5,
-	RANK_6,
-	RANK_7,
-	RANK_8,
-	RANK_9,
-	RANK_10,
-	RANK_JACK,
-	RANK_QUEEN,
-	RANK_KING,
-	RANK_ACE,
-	MAX_RANKS
-};
- 
-struct Card
-{
-	CardRank rank;
-	CardSuit suit;
-};
- 
-void printCard(const Card &card)
-{
-	switch (card.rank)
+	switch (m_rank)
 	{
 		case RANK_2:		std::cout << '2'; break;
 		case RANK_3:		std::cout << '3'; break;
@@ -54,8 +21,8 @@ void printCard(const Card &card)
 		case RANK_KING:		std::cout << 'K'; break;
 		case RANK_ACE:		std::cout << 'A'; break;
 	}
- 
-	switch (card.suit)
+
+	switch (m_suit)
 	{
 		case SUIT_CLUB:		std::cout << 'C'; break;
 		case SUIT_DIAMOND:	std::cout << 'D'; break;
@@ -63,50 +30,9 @@ void printCard(const Card &card)
 		case SUIT_SPADE:	std::cout << 'S'; break;
 	}
 }
- 
-void printDeck(const std::array<Card, 52> &deck)
+int CardClass::getCardValue()
 {
-	for (const auto &card : deck)
-	{
-		printCard(card);
-		std::cout << ' ';
-	}
- 
-	std::cout << '\n';
-}
- 
-void swapCard(Card &a, Card &b)
-{
-	Card temp = a;
-	a = b;
-	b = temp;
-}
- 
-// Generate a random number between min and max (inclusive)
-// Assumes srand() has already been called
-int getRandomNumber(int min, int max)
-{
-	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);  // static used for efficiency, so we only calculate this value once
- 	// evenly distribute the random number across our range
-	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
-}
- 
-void shuffleDeck(std::array<Card, 52> &deck)
-{
-	// Step through each card in the deck
-	using index_t = std::array<Card, 52>::size_type;
-	for (index_t index = 0; index < 52; ++index)
-	{
-		// Pick a random card, any card
-		index_t swapIndex = getRandomNumber(0, 51);
-		// Swap it with the current card
-		swapCard(deck[index], deck[swapIndex]);
-	}
-}
- 
-int getCardValue(const Card &card)
-{
-	switch (card.rank)
+	switch (m_rank)
 	{
 	case RANK_2:		return 2;
 	case RANK_3:		return 3;
@@ -122,10 +48,74 @@ int getCardValue(const Card &card)
 	case RANK_KING:		return 10;
 	case RANK_ACE:		return 11;
 	}
-	
+
 	return 0;
 }
- 
+
+// Generate a random number between min and max (inclusive)
+// Assumes srand() has already been called
+int getRandomNumber(int min, int max)
+{
+	static const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);  // static used for efficiency, so we only calculate this value once
+ 	// evenly distribute the random number across our range
+	return static_cast<int>(rand() * fraction * (max - min + 1) + min);
+}
+
+void swapCard(CardClass &card_a, CardClass &card_b)
+{
+	CardClass temp = card_a;
+	card_a = card_b;
+	card_b = temp;
+}
+
+DeckClass::DeckClass()
+{
+		index_t card = 0;
+
+		for (int suit = 0; suit < MAX_SUITS; ++suit)
+		for (int rank = 0; rank < MAX_RANKS; ++rank)
+		{
+			m_deck[card].m_suit = static_cast<CardSuit>(suit);
+			m_deck[card].m_rank = static_cast<CardRank>(rank);
+			++card;
+		}
+}
+
+void DeckClass::printDeck()
+	{
+		for (CardClass card : m_deck)
+		{
+			card.printCard();
+			std::cout << ' ';
+		}
+
+		std::cout << '\n';
+	}
+
+void DeckClass::shuffleDeck()
+{
+	// Step through each card in the deck
+	for (index_t index = 0; index < 52; ++index)
+	{
+		// Pick a random card, any card
+		index_t swapIndex = getRandomNumber(0, 51);
+		// Swap it with the current card
+		swapCard(m_deck[index], m_deck[swapIndex]);
+	}
+}
+
+class BlackJack
+{
+private:
+	bool m_win = false; //boolean to check to see if you won
+	int m_playerTotal = 0;
+	int m_dealerTotal = 0;
+	int m_cardnum = 0;
+public:
+	DeckClass m_deck;
+
+
+BlackJack(){m_deck.shuffleDeck();}
 char getPlayerChoice()
 {
 	std::cout << "(h) to hit, or (s) to stand: ";
@@ -134,82 +124,76 @@ char getPlayerChoice()
 	{
 		std::cin >> choice;
 	} while (choice != 'h' && choice != 's');
-	
+
 	return choice;
 }
- 
-bool playBlackjack(const std::array<Card, 52> &deck)
+bool getWin(){return m_win;}
+void playBlackjack()
 {
 	// Set up the initial game state
-	const Card *cardPtr = &deck[0];
- 
-	int playerTotal = 0;
-	int dealerTotal = 0;
- 
+
 	// Deal the dealer one card
-	dealerTotal += getCardValue(*cardPtr++);
-	std::cout << "The dealer is showing: " << dealerTotal << '\n';
- 
+	m_dealerTotal += m_deck.m_deck[m_cardnum].getCardValue();
+	m_cardnum++;
+	std::cout << "The dealer is showing: " << m_dealerTotal << '\n';
+
 	// Deal the player two cards
-	playerTotal += getCardValue(*cardPtr++);
-	playerTotal += getCardValue(*cardPtr++);
- 
+	m_playerTotal += m_deck.m_deck[m_cardnum].getCardValue();
+	m_cardnum++;
+	m_playerTotal += m_deck.m_deck[m_cardnum].getCardValue();
+	m_cardnum++;
+
 	// Player goes first
 	while (true) // infinite loop (until we break or return)
 	{
-		std::cout << "You have: " << playerTotal << '\n';
- 
+		std::cout << "You have: " << m_playerTotal << '\n';
+
 		// See if the player has busted
-		if (playerTotal > 21)
-			return false;
- 
+		if (m_playerTotal > 21)
+		{
+			m_win = false;
+			return;
+		}
+
 		char choice = getPlayerChoice();
 		if (choice == 's')
 			break;
- 
-		playerTotal += getCardValue(*cardPtr++);
+
+		m_playerTotal += m_deck.m_deck[m_cardnum].getCardValue();
+		m_cardnum++;
 	}
- 
+
 	// If player hasn't busted, dealer goes until he has at least 17 points
-	while (dealerTotal < 17)
+	while (m_dealerTotal < 17)
 	{
-		dealerTotal += getCardValue(*cardPtr++);
-		std::cout << "The dealer now has: " << dealerTotal << '\n';
+		m_dealerTotal += m_deck.m_deck[m_cardnum].getCardValue();
+		m_cardnum++;
+		std::cout << "The dealer now has: " << m_dealerTotal << '\n';
 	}
- 
+
 	// If dealer busted, player wins
-	if (dealerTotal > 21)
-		return true;
- 
-	return (playerTotal > dealerTotal);
+	if (m_dealerTotal > 21)
+	{
+		m_win = true;
+		return;
+	}
+		m_win = (m_playerTotal > m_dealerTotal);
+	return;
 }
- 
+};
+
 int main()
 {
 	srand(static_cast<unsigned int>(time(0))); // set initial seed value to system clock
 	rand(); // If using Visual Studio, discard first random value
- 
-	std::array<Card, 52> deck;
-	
-	// We could initialize each card individually, but that would be a pain.  Let's use a loop.
- 
-	using index_t = std::array<Card, 52>::size_type;
-	index_t card = 0;
- 
-	for (int suit = 0; suit < MAX_SUITS; ++suit)
-	for (int rank = 0; rank < MAX_RANKS; ++rank)
-	{
-		deck[card].suit = static_cast<CardSuit>(suit);
-		deck[card].rank = static_cast<CardRank>(rank);
-		++card;
-	}
-	
-	shuffleDeck(deck);
- 
-	if (playBlackjack(deck))
+
+	BlackJack blackjackgame;
+	blackjackgame.playBlackjack();
+
+	if (blackjackgame.getWin())
 		std::cout << "You win!\n";
 	else
 		std::cout << "You lose!\n";
- 
+
 	return 0;
 }

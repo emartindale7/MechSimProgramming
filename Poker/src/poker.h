@@ -8,10 +8,13 @@
 #ifndef SRC_POKER_H_
 #define SRC_POKER_H_
 
+
+
 #include <iostream>
 #include <array>
 #include <ctime> // for time()
 #include <cstdlib> // for rand() and srand()
+#include <array>
 
 enum CardSuit
 {
@@ -53,13 +56,15 @@ public:
 // Assumes srand() has already been called
 int getRandomNumber(int min, int max);
 void swapCard(CardClass &card_a, CardClass &card_b);
+
 class DeckClass
 {
 public:
 	std::array<CardClass, 52> m_deck;
 	using index_t = std::array<CardClass, 52>::size_type;
-void printDeck();
-void shuffleDeck();
+	DeckClass();
+	void printDeck();
+	void shuffleDeck();
 };
 
 
